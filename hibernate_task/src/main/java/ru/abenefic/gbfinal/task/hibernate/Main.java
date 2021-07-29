@@ -12,12 +12,17 @@ public class Main {
             studentsRepository.save(student);
         }
 
+        Student student = studentsRepository.findById(555L);
+        student.setName(student.getName() + " modified");
+        studentsRepository.save(student);
+
         for (long i = 1; i < 1000; i *= 4) {
-            Student student = studentsRepository.findById(i);
+            student = studentsRepository.findById(i);
             System.out.println(student);
             studentsRepository.remove(student);
         }
-
+        student = studentsRepository.findById(555L);
+        System.out.println(student);
         List<Student> students = studentsRepository.findAll();
         System.out.println(students.size());
     }
