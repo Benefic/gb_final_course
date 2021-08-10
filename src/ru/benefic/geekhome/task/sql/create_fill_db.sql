@@ -1,114 +1,76 @@
-CREATE DATABASE IF NOT EXISTS `cinema`;
-USE `cinema`;
-
-CREATE TABLE `durations`
+create table movie
 (
-    `idduration` int unsigned NOT NULL AUTO_INCREMENT,
-    `duration`   int unsigned NOT NULL DEFAULT  '90' ,
-    PRIMARY KEY (`idduration`),
-    UNIQUE KEY `idduration_UNIQUE` (`idduration`)
+    id       int auto_increment primary key,
+    name     varchar not null,
+    duration int     not null
 );
+create unique index UI_movie_name on movie (name);
 
-INSERT INTO `durations`
-VALUES (1, 60),
-       (2, 90),
-       (3, 120);
-
-CREATE TABLE `movies`
+create table session
 (
-    `idmovie`  int unsigned  NOT NULL AUTO_INCREMENT,
-    `name`     varchar(1000) NOT NULL DEFAULT '< unnamed >',
-    `duration` int unsigned  NOT NULL,
-    PRIMARY KEY (`idmovie`),
-    UNIQUE KEY `idmovie_UNIQUE` (`idmovie`),
-    KEY `duration_idx` (`duration`),
-    CONSTRAINT `duration` FOREIGN KEY (`duration`) REFERENCES `durations` (`idduration`)
+    id         int auto_increment primary key,
+    movie_id   int      not null,
+    start_time datetime not null,
+    price      decimal  not null,
+    foreign key (movie_id) references movie (id)
 );
+create index I_Session_Movie_Id on session (movie_id);
+create index I_Session_Start_Time on session (start_time);
 
-INSERT INTO `movies`
-VALUES (1, 'Залечь на дно в Брюгге', 2),
-       (2, 'Доктор Стрейнджлав, или Как я перестал бояться и полюбил бомбу', 2),
-       (3, 'Человек с Земли', 1),
-       (4, 'Космическая одиссея 2001 года', 3),
-       (5, 'Дракула Брэма Стокера', 3);
-
-CREATE TABLE `price`
+create table ticket
 (
-    `idprice` int unsigned            NOT NULL AUTO_INCREMENT,
-    `price`   decimal(10, 2) unsigned NOT NULL DEFAULT ' 0.00 ',
-    `session` int unsigned            NOT NULL,
-    PRIMARY KEY (`idprice`),
-    UNIQUE KEY `idprice_UNIQUE` (`idprice`),
-    KEY `session_idx` (`session`),
-    CONSTRAINT `session` FOREIGN KEY (`session`) REFERENCES `sessions` (`idsessions`)
+    id         int auto_increment primary key,
+    session_id int not null,
+    place      int not null,
+    foreign key (session_id) references session (id)
 );
+create unique index UI_Ticket_Session_Place on ticket (session_id, place);
 
-INSERT INTO `price`
-VALUES (1, 500.00, 1),
-       (2, 500.00, 2),
-       (3, 500.00, 3),
-       (4, 500.00, 4),
-       (5, 500.00, 5),
-       (6, 700.00, 6),
-       (7, 700.00, 7),
-       (8, 700.00, 8),
-       (9, 800.00, 9),
-       (10, 800.00, 10),
-       (11, 900.00, 11),
-       (12, 900.00, 12),
-       (13, 1000.00, 13),
-       (14, 1000.00, 14),
-       (15, 1000.00, 15);
+INSERT INTO movie (name, duration)
+VALUES ('Залечь на дно в Брюгге', 90),
+       ('Доктор Стрейнджлав, или Как я перестал бояться и полюбил бомбу', 90),
+       ('Человек с Земли', 60),
+       ('Космическая одиссея 2001 года', 120),
+       ('Дракула Брэма Стокера', 120);
 
-CREATE TABLE `sessions`
-(
-    `idsessions` int unsigned NOT NULL AUTO_INCREMENT,
-    `datetime`   datetime     NOT NULL,
-    `movie`      int unsigned NOT NULL,
-    PRIMARY KEY (`idsessions`),
-    UNIQUE KEY `idsessions_UNIQUE` (`idsessions`),
-    KEY `movie_idx` (`movie`),
-    CONSTRAINT `movie` FOREIGN KEY (`movie`) REFERENCES `movies` (`idmovie`)
-);
+INSERT INTO session (movie_id, start_time, price)
+VALUES (1, '2021-07-23 09:00:00', 100),
+       (2, '2021-07-23 11:00:00', 200),
+       (3, '2021-07-23 13:00:00', 300),
+       (4, '2021-07-23 15:00:00', 400),
+       (5, '2021-07-23 16:00:00', 500),
+       (1, '2021-07-24 12:00:00', 100),
+       (2, '2021-07-25 12:00:00', 200),
+       (3, '2021-07-25 11:00:00', 300),
+       (4, '2021-07-25 22:00:00', 400),
+       (5, '2021-07-26 10:00:00', 500),
+       (1, '2021-07-26 12:30:00', 100),
+       (2, '2021-07-27 10:30:00', 200),
+       (3, '2021-07-27 12:30:00', 300),
+       (4, '2021-07-27 15:30:00', 400),
+       (5, '2021-07-27 18:30:00', 500);
 
-INSERT INTO `sessions`
-VALUES (1, '2021-07-23 09:00:00', 1),
-       (2, '2021-07-23 11:00:00', 2),
-       (3, '2021-07-23 13:00:00', 3),
-       (4, '2021-07-23 15:00:00', 4),
-       (5, '2021-07-23 16:00:00', 5),
-       (6, '2021-07-24 12:00:00', 1),
-       (7, '2021-07-25 12:00:00', 2),
-       (8, '2021-07-25 11:00:00', 3),
-       (9, '2021-07-25 22:00:00', 4),
-       (10, '2021-07-26 10:00:00', 5),
-       (11, '2021-07-26 12:30:00', 1),
-       (12, '2021-07-27 10:30:00', 2),
-       (13, '2021-07-27 12:30:00', 3),
-       (14, '2021-07-27 15:30:00', 4),
-       (15, '2021-07-27 18:30:00', 5);
-
-CREATE TABLE `tickets`
-(
-    `number`  int unsigned NOT NULL AUTO_INCREMENT,
-    `session` int unsigned NOT NULL,
-    PRIMARY KEY (`number`),
-    UNIQUE KEY `number_UNIQUE` (`number`),
-    KEY `session_idx` (`session`),
-    CONSTRAINT `sessionid` FOREIGN KEY (`session`) REFERENCES `sessions` (`idsessions`)
-);
-
-INSERT INTO `tickets`
-VALUES (1, 1),
-       (2, 1),
-       (3, 1),
-       (4, 3),
-       (5, 3),
-       (6, 3),
-       (7, 5),
-       (8, 5),
-       (9, 5),
-       (10, 10),
-       (11, 10),
-       (12, 12),
-       (13, 12);
+insert into ticket (session_id, place)
+select id, 1
+from session
+union
+select id, 2
+from session
+union
+select id, 3
+from session
+union
+select id, 4
+from session
+union
+select id, 5
+from session
+union
+select id, 6
+from session
+union
+select id, 7
+from session
+union
+select id, 8
+from session;
